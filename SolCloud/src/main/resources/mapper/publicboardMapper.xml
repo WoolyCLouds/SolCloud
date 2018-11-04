@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sol4.cloud.DAO.PublicboardDAO">
+
+	<insert id="writePublicboardPost" parameterType="com.sol4.cloud.Domain.Cloud">
+		INSERT INTO sc_publicboard VALUES (publicboard_seq.nextval, #{pb_class}, #{pb_title}, #{pb_content}, #{pb_file}, #{pb_writer}, sysdate, 1)
+	</insert>
+	
+	<delete id="deletePublicboardPost" parameterType="com.sol4.cloud.Domain.Cloud">
+		DELETE FROM sc_publicboard WHERE pb_writer = #{pb_writer} AND pb_num = #{pb_num}
+	</delete>
+	
+	<update id="updateViewCnt" parameterType="com.sol4.cloud.Domain.Cloud">
+		UPDATE sc_publicboard
+		SET pb_viewcnt = pb_viewcnt + 1 
+		WHERE pb_num = #{pb_num}
+	</update>
+	
+	<update id="updatePublicboardPost" parameterType="com.sol4.cloud.Domain.Cloud">
+		UPDATE sc_publicboard
+		SET pb_title = #{pb_title},
+			pb_content = #{pb_content},
+			pb_file = #{pb_file},
+			pb_date = sysdate 
+		WHERE pb_num = #{pb_num}
+	</update>
+	
+	<select id="getPublicboard" parameterType="com.sol4.cloud.Domain.Cloud" resultType="com.sol4.cloud.Domain.Cloud">
+		SELECT * FROM sc_publicboard WHERE pb_num = #{pb_num}
+	</select>
+	
+	<select id="checkFile" parameterType="com.sol4.cloud.Domain.Cloud" resultType="java.lang.Integer">
+		SELECT COUNT(f_name) FROM sc_board_${pb_writer} WHERE f_name LIKE '%${pb_file}%' AND f_share = 1
+	</select>
+	
+	<select id="getShareFile" parameterType="com.sol4.cloud.Domain.Cloud" resultType="com.sol4.cloud.Domain.Cloud">
+		SELECT f_name FROM sc_board_${m_id} WHERE f_share = 1
+	</select>
+	
+	<select id="checkPublicboard" resultType="java.lang.Integer">
+		SELECT COUNT(pb_num) FROM sc_publicboard
+	</select>
+	
+	<!-- 게시글 전체 목록 조회 및 검색조회까지 -->
+	<select id="listAllPublicboard" resultType="com.sol4.cloud.Domain.Cloud">
+	    <!-- 목록 조회 및 페이징 전체 쿼리 -->
+	    <include refid="pagingHeader"></include>
+	        SELECT * 
+	        FROM sc_publicboard 
+	        <include refid="search"></include>
+	        ORDER BY pb_num DESC 
+	    <include refid="pagingFooter"></include>    
+	</select>
+	 
+	<!-- 검색 조건 sql -->
+	<sql id="search">
+	    <choose>
+	        <!-- 검색옵션이 전체 검색일 경우 -->
+	        <when test="searchOption == 'all'">
+	            WHERE (pb_writer like '%'||#{keyword}||'%' 
+	            OR pb_content like '%'||#{keyword}||'%' 
+	            OR pb_title like '%'||#{keyword}||'%')
+	        </when>
+	        <!-- 전체 검색이 아닐 경우 -->
+	        <otherwise>
+	            WHERE ${searchOption} like '%'||#{keyword}||'%'
+	        </otherwise>
+	    </choose>
+	</sql>
+	 
+	<!-- 페이징 sql -->
+	<sql id="pagingHeader">
+	    SELECT * FROM (
+	        SELECT ROWNUM AS rn, A.* FROM (
+	</sql>
+	<sql id="pagingFooter">
+	        ) A
+	    ) WHERE rn BETWEEN #{start} AND #{end}
+	</sql>
+
+</mapper>
