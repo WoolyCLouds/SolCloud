@@ -118,9 +118,7 @@ public class PublicboardController {
 	
 	// 공유 게시판 글 작성
 	@RequestMapping(value="publicboardWrite.do", method = RequestMethod.POST)
-	public ModelAndView publicboardWrite_do (@RequestParam("pb_class") int pb_class, @RequestParam("pb_title") String pb_title,
-			@RequestParam("pb_content") String pb_content, @RequestParam("pb_file") String pb_file, 
-			HttpServletRequest request, HttpSession session, Cloud c) throws Exception {
+	public ModelAndView publicboardWrite_do (HttpServletRequest request, HttpSession session, Cloud c) throws Exception {
 		
 		ModelAndView mav = new ModelAndView();
 		if(session.getAttribute("sessionID") != null) {
@@ -128,11 +126,9 @@ public class PublicboardController {
 			request.setAttribute("UC", (int)(((double)bService.usedCapacity(c)/2048)*100));
 			
 			c.setPb_writer((String)session.getAttribute("sessionID"));
-			c.setPb_class(pb_class);
-			c.setPb_title(pb_title);
-			c.setPb_content(pb_content);
-			c.setPb_file(pb_file);
-			
+			if(c.getPb_class()==2) {
+				c.setPb_file("");
+			}
 			nService.writePublicboardPost(c);
 			
 			mav.setViewName("redirect:publicboardList.go");

@@ -32,7 +32,7 @@
 		console.log(pb_title);
 		
 		if (pb_class == 2) {
-			$('#pb_file').prop('disabled', true);
+			$('#pb_file').attr('disabled', true);
 			if (pb_title != '') {
 				$('#btn_submit').prop('disabled', false).addClass('btn-primary');
 			} else {
@@ -79,7 +79,7 @@
 										</td>
 									</tr>
 									<tr>
-										<th>파일</th>
+										<th>분류</th>
 										<td>
 											<div class="form-label-group">
 												<select class="form-control" name="pb_class" id="pb_class" required="required" onchange="check();">
